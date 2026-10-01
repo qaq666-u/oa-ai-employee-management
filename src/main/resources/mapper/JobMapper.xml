@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.liys.oaback.dao.JobMapper">
+
+    <insert id="insert" parameterType="Job" useGeneratedKeys="true" keyProperty="id">
+        insert into job (name, sort) values (#{name}, #{sort})
+    </insert>
+
+    <update id="update" parameterType="Job">
+        update job
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="sort != null">sort = #{sort},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="countEmpByJobId" parameterType="long" resultType="long">
+        select count(*) from emp where job_id = #{jobId}
+    </select>
+
+
+    <delete id="deleteById" parameterType="long">
+            delete from job where id = #{id}
+    </delete>
+    <select id="selectById" parameterType="long" resultType="Job">
+        select * from job where id = #{id}
+    </select>
+    <select id="countByQuery" parameterType="com.liys.oaback.domain.CommonQuery" resultType="long">
+        select count(*) from job
+        <where>
+            <if test="name != null and name != ''">
+                name like concat('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAll" resultType="Job">
+        select * from job order by sort, id
+    </select>
+
+
+    <select id="selectPage" parameterType="com.liys.oaback.domain.CommonQuery" resultType="com.liys.oaback.domain.Job">
+
+
+        select * from job <where>
+
+        <if test="name != null and name != ''">
+            name like concat('%', #{name}, '%')
+        </if>
+    </where>
+        order by
+        <choose>
+            <when test="sortBy == 'name'">name</when>
+            <when test="sortBy == 'sort'">sort</when>
+            <otherwise>sort</otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'ascending'">ASC</when>
+            <when test="sortOrder == 'descending'">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>, id ASC limit #{offset}, #{pageSize}
+
+    </select>
+
+
+</mapper>
+
+    <!--查询所有职位-->

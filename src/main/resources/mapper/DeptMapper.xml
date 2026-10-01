@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liys.oaback.dao.DeptMapper">
+
+    <select id="selectPage" parameterType="com.liys.oaback.domain.CommonQuery" resultType="com.liys.oaback.domain.Dept">
+
+
+   select * from dept <where>
+
+   <if test="name != null and name != ''">
+     name like concat('%', #{name}, '%')
+   </if>
+    </where>
+     order by
+     <choose>
+         <when test="sortBy == 'name'">name</when>
+         <when test="sortBy == 'createTime'">create_time</when>
+         <otherwise>id</otherwise>
+     </choose>
+     <choose>
+         <when test="sortOrder == 'ascending'">ASC</when>
+         <when test="sortOrder == 'descending'">DESC</when>
+         <otherwise>DESC</otherwise>
+     </choose>, id DESC limit #{offset}, #{pageSize}
+
+    </select>
+
+    <select id="countByQuery" parameterType="com.liys.oaback.domain.CommonQuery" resultType="long">
+         select count(1) from dept
+         <where>
+             <if test="name != null and name != ''">
+                 name like concat('%', #{name}, '%')
+          </if>
+         </where>
+    </select>
+
+    <select id="selectAll" resultType="Dept">
+        select * from dept order by id
+    </select>
+    <select id="selectById" parameterType="Long" resultType="Dept">
+        select * from dept where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="dept"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into dept (name, description) values (#{name}, #{description})
+    </insert>
+
+
+    <delete id="deleteById" parameterType="long">
+     delete  from dept where  id =#{id}
+    </delete>
+    <select id="countEmpByDeptId" parameterType="long" resultType="long">
+             select count(1) from emp where dept_id = #{deptId}
+    </select>
+
+    <update id="update" parameterType="dept">
+        update dept <set>
+                 <if test="name!=null">name=#{name},</if>
+            <if test="description!=null">description=#{description},</if>
+    </set>
+        where id=#{id}
+    </update>
+
+</mapper>

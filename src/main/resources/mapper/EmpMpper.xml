@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- parameterType:传入参数的类型 -->
+<mapper namespace="com.liys.oaback.dao.EmpMapper">
+
+    <!--  所有列 名字的字段   -->
+    <sql id="empColumns">
+         e.*, d.name AS dept_name, j.name AS job_name
+    </sql>
+
+    <sql id="sqlColumns">
+        id, emp_no, username, password, name, gender, phone,
+            email, avatar, dept_id, job_id, hire_date, status
+    </sql>
+
+    <!--  所有表的连接关系   -->
+    <sql id="empFrom">
+        from emp e
+        left join dept d on e.dept_id = d.id
+        left join job j on e.job_id = j.id
+    </sql>
+    <sql id="empWhere">
+        <where>
+            <if test="name != null and name != ''">
+                and e.name like concat('%', #{name}, '%')
+            </if>
+            <if test="deptId != null">
+                and e.dept_id = #{deptId}
+            </if>
+            <if test="jobId != null">
+                and e.job_id = #{jobId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and e.hire_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and e.hire_date &lt;= #{endDate}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" parameterType="com.liys.oaback.domain.EmpQuery" resultType="Emp">
+        select <include refid="empColumns"/>
+        <include refid="empFrom"/>
+        <include refid="empWhere"/>
+        order by
+        <choose>
+            <when test="sortBy == 'empNo'">e.emp_no</when>
+            <when test="sortBy == 'name'">e.name</when>
+            <when test="sortBy == 'gender'">e.gender</when>
+            <when test="sortBy == 'deptName'">d.name</when>
+            <when test="sortBy == 'jobName'">j.name</when>
+            <when test="sortBy == 'phone'">e.phone</when>
+            <when test="sortBy == 'email'">e.email</when>
+            <when test="sortBy == 'hireDate'">e.hire_date</when>
+            <when test="sortBy == 'status'">e.status</when>
+            <otherwise>e.id</otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'ascending'">ASC</when>
+            <when test="sortOrder == 'descending'">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>, e.id ASC
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="selectAll" resultType="Emp">
+        select <include refid="empColumns"/>
+        <include refid="empFrom"/>
+        order by e.id
+    </select>
+
+
+ <!--  根据用户名查询用户信息  -->
+
+    <select id="selectByUsername" parameterType="string"
+            resultType="com.liys.oaback.domain.Emp">
+        select <include refid="empColumns" />
+        <include refid="empFrom" />
+        where e.username = #{username}
+    </select>
+
+
+
+    <!--  插入用户信息  -->
+    <insert id="insert" parameterType="Emp" useGeneratedKeys="true" keyProperty="id">
+        insert into emp (emp_no, username, password, name, gender, phone, email, avatar, dept_id, job_id, hire_date, status, role)
+        values (#{empNo}, #{username}, #{password}, #{name}, #{gender}, #{phone}, #{email}, #{avatar}, #{deptId}, #{jobId}, #{hireDate}, #{status}, #{role})
+    </insert>
+
+
+
+
+
+<!--  更新用户信息  -->
+    <update id="update" parameterType="Emp">
+        update emp
+        <set>
+
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+
+            <if test="deptId != null">
+                dept_id = #{deptId},
+            </if>
+            <if test="jobId != null">
+                job_id = #{jobId},
+            </if>
+            <if test="hireDate != null">
+                hire_date = #{hireDate},
+            </if>
+        </set>
+        where id = #{id}
+
+
+    </update>
+
+    <!--  根据id删除用户  -->
+    <delete id="deleteById" parameterType="long" >
+        delete from emp where id = #{id}
+    </delete>
+
+    <!--  删除全部  -->
+    <delete id="deleteBatch">
+        delete from emp where id in
+        <foreach item="id" collection="ids" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateStatus">
+        update emp set status = #{status} where id = #{id}
+    </update>
+    <update id="updateAvatar" >
+        update emp set avatar = #{avatar} where id = #{id}
+    </update>
+    <update id="updateIdentity">
+        update emp set emp_no = #{empNo}, username = #{username} where id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="Long"
+            resultType="com.liys.oaback.domain.Emp">
+        select <include refid="empColumns"/> from emp e
+        left join dept d on e.dept_id = d.id
+        left join job j on e.job_id = j.id
+        where e.id = #{id}
+    </select>
+    <update id="updatePassword" >
+        update emp set password = #{password} where id = #{id}
+    </update>
+
+    <!--- 根据查询条件统计总条数 -->
+    <select id="countByQuery" parameterType="com.liys.oaback.domain.EmpQuery" resultType="long">
+
+      select count(1)  from emp e <include refid="empWhere"/>
+
+   </select>
+
+
+
+
+
+
+
+
+
+
+</mapper>

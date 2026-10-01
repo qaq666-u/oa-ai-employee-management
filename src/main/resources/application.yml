@@ -1,0 +1,39 @@
+server:
+  port: 8083
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/oa_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+  ai:
+    model:
+      chat: ${SPRING_AI_MODEL_CHAT:none}
+    dashscope:
+      enabled: ${DASHSCOPE_ENABLED:false}
+      api-key: ${DASHSCOPE_API_KEY:}
+      agent:
+        enabled: false
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.7
+          max-tokens: 1000
+          top-p: 0.9
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.liys.oaback.domain
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    com.liys.oaback.dao: info
+    org.springframework.ai: INFO
+    com.alibaba.cloud.ai: INFO
+file:
+  upload-dir: ${OA_UPLOAD_DIR:${user.dir}/uploads}
+  base-url: ${OA_BASE_URL:http://localhost:8083}
